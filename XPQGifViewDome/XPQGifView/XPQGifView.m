@@ -17,8 +17,8 @@
 @end
 
 @implementation XPQGifView
-
--(instancetype)init {
+#pragma mark - 初始化
+- (instancetype)init {
     self = [super init];
     if (self) {
         [self configSelf];
@@ -26,7 +26,7 @@
     return self;
 }
 
--(instancetype)initWithCoder:(NSCoder *)aDecoder {
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if (self) {
         [self configSelf];
@@ -34,10 +34,19 @@
     return self;
 }
 
--(instancetype)initWithFrame:(CGRect)frame {
+- (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         [self configSelf];
+    }
+    return self;
+}
+
+- (instancetype)initWithGifData:(NSData *)gifData {
+    self = [super init];
+    if (self) {
+        [self configSelf];
+        self.gifData = gifData;
     }
     return self;
 }
@@ -49,6 +58,7 @@
     _sleep = 1.0;
 }
 
+#pragma mark - 属性
 - (void)setGifData:(NSData *)gifData {
     if (_gifData == gifData) {
         return;
@@ -59,6 +69,7 @@
     self.image = [UIImage imageWithData:_gifData];
 }
 
+#pragma mark - 操作
 -(void)start {
     [self playGifAnimation];
 }
