@@ -46,6 +46,7 @@
     _isPlay = NO;
     _loopCount = NSUIntegerMax;
     _frameIndex = 0;
+    _sleep = 1.0;
 }
 
 - (void)setGifData:(NSData *)gifData {
@@ -102,6 +103,7 @@
             }
             
             NSTimeInterval frameDelay = [weakSelf delayTimeWithSource:src andIndex:weakSelf.frameIndex];
+            frameDelay *= weakSelf.sleep;
             weakSelf.frameIndex ++;
             if (weakSelf.frameIndex == frameCount) {
                 weakSelf.frameIndex = 0;
@@ -112,9 +114,10 @@
             CGImageRef cgImg = CGImageSourceCreateImageAtIndex(src, weakSelf.frameIndex, NULL);
             UIImage *image = [UIImage imageWithCGImage:cgImg];
             CGImageRelease(cgImg);
+            // 使用下面一句替换上面三句的话，在Release模式下内存暴涨
 //            UIImage *image = [weakSelf imageWithSource:src andIndex:weakSelf.frameIndex];
             [NSThread sleepUntilDate:[beginTime dateByAddingTimeInterval:frameDelay]];
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_sync(dispatch_get_main_queue(), ^{  // 使用异步的话有小概率出现问题
                 if (weakSelf.isPlay && !weakSelf.isSourceChange) {
                     weakSelf.image = image;
                 }
