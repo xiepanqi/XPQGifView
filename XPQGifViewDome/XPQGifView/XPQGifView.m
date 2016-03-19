@@ -10,8 +10,10 @@
 #import <ImageIO/ImageIO.h>
 
 @interface XPQGifView ()
-@property (nonatomic, assign) BOOL isRun;
+@property (nonatomic, assign) BOOL isPlay;
 @property (nonatomic, assign) size_t frameIndex;
+/// 标识图片资源是否改变。
+@property (nonatomic, assign) BOOL isSourceChange;
 @end
 
 @implementation XPQGifView
@@ -41,51 +43,91 @@
 }
 
 - (void)configSelf {
+    _isPlay = NO;
     _loopCount = NSUIntegerMax;
     _frameIndex = 0;
 }
 
-- (void)loadGifData:(NSData *)data {
-    if (_isRun) {
+- (void)setGifData:(NSData *)gifData {
+    if (_gifData == gifData) {
         return;
     }
-    else {
-        _isRun = YES;
-    }
-    self.image = [UIImage imageWithData:data];
-    __weak XPQGifView *weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        CGImageSourceRef src = CGImageSourceCreateWithData((CFDataRef)data, NULL);
-        if (src) {
-            size_t frameCount = CGImageSourceGetCount(src);
-            while (weakSelf.isRun) {
-                NSDate *beginTime = [NSDate date];
-                NSTimeInterval frameDelay = [weakSelf delayTimeWithSource:src andIndex:weakSelf.frameIndex];
-                weakSelf.frameIndex ++;
-                if (weakSelf.frameIndex == frameCount) {
-                    weakSelf.frameIndex = 0;
-                    if (weakSelf.loopCount != NSUIntegerMax) {
-                        weakSelf.loopCount --;
-                    }
-                }
-                UIImage *image = [weakSelf imageWithSource:src andIndex:weakSelf.frameIndex];
-                [NSThread sleepUntilDate:[beginTime dateByAddingTimeInterval:frameDelay]];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    weakSelf.image = image;
-                });
-            }
-            CFRelease(src);
-            weakSelf.isRun = NO;
-        }
-    });
+    _gifData = gifData;
+    _isSourceChange = YES;
+    _frameIndex = 0;
+    self.image = [UIImage imageWithData:_gifData];
+}
+
+-(void)start {
+    [self playGifAnimation];
+}
+
+-(void)suspend {
+    _isPlay = NO;
 }
 
 -(void)stop {
-    _isRun = NO;
+    _isPlay = NO;
     _frameIndex = 0;
-    
+    self.image = [UIImage imageWithData:_gifData];
 }
 
+#pragma mark - gif播发代码
+- (void)playGifAnimation {
+    if (_isPlay) {
+        return;
+    }
+    else {
+        _isPlay = YES;
+    }
+    __weak XPQGifView *weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        CGImageSourceRef src = nil;
+        size_t frameCount = 0;
+        while (weakSelf.isPlay) {
+            NSDate *beginTime = [NSDate date];
+            // gifData改变或者线程刚开始src为nil，并且要gifData有数据
+            if ((weakSelf.isSourceChange || src == nil) && weakSelf.gifData != nil) {
+                weakSelf.isSourceChange = NO;
+                if (src) {
+                    CFRelease(src);
+                }
+                src = CGImageSourceCreateWithData((__bridge CFDataRef)weakSelf.gifData, NULL);
+                if (src) {
+                    frameCount = CGImageSourceGetCount(src);
+                }
+                else {
+                    return;
+                }
+            }
+            
+            NSTimeInterval frameDelay = [weakSelf delayTimeWithSource:src andIndex:weakSelf.frameIndex];
+            weakSelf.frameIndex ++;
+            if (weakSelf.frameIndex == frameCount) {
+                weakSelf.frameIndex = 0;
+                if (weakSelf.loopCount != NSUIntegerMax) {
+                    weakSelf.loopCount --;
+                }
+            }
+            CGImageRef cgImg = CGImageSourceCreateImageAtIndex(src, weakSelf.frameIndex, NULL);
+            UIImage *image = [UIImage imageWithCGImage:cgImg];
+            CGImageRelease(cgImg);
+//            UIImage *image = [weakSelf imageWithSource:src andIndex:weakSelf.frameIndex];
+            [NSThread sleepUntilDate:[beginTime dateByAddingTimeInterval:frameDelay]];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (weakSelf.isPlay && !weakSelf.isSourceChange) {
+                    weakSelf.image = image;
+                }
+            });
+        }
+        if (src) {
+            CFRelease(src);
+        }
+        weakSelf.isPlay = NO;
+    });
+}
+
+/// 获取gif指定帧图像，在Release模式下内存暴涨，但使用Leaks检测内存并没有泄漏
 -(UIImage *)imageWithSource:(CGImageSourceRef)src andIndex:(size_t)index {
     CGImageRef cgImg = CGImageSourceCreateImageAtIndex(src, index, NULL);
     UIImage *image = [UIImage imageWithCGImage:cgImg];
@@ -93,10 +135,16 @@
     return image;
 }
 
+/// 获取gif指定帧持续时间，好像有内存泄漏，不过用Leaks检测不出
 -(NSTimeInterval)delayTimeWithSource:(CGImageSourceRef)src andIndex:(size_t)index {
-    NSDictionary *properties = (NSDictionary *)CFBridgingRelease(CGImageSourceCopyPropertiesAtIndex(src, index, NULL));
-    NSDictionary *frameProperties = [properties objectForKey:(NSString *)kCGImagePropertyGIFDictionary];
-    NSNumber *delayTime = [frameProperties objectForKey:(NSString *)kCGImagePropertyGIFDelayTime];
-    return delayTime.floatValue;
+    CGFloat frameDelay = 0.0;
+    CFDictionaryRef properties = CGImageSourceCopyPropertiesAtIndex(src, index, NULL);
+    CFDictionaryRef frameProperties = CFDictionaryGetValue(properties, kCGImagePropertyGIFDictionary);
+    CFNumberRef delayTime = CFDictionaryGetValue(frameProperties, kCGImagePropertyGIFDelayTime);
+    CFNumberGetValue(delayTime, kCFNumberFloat64Type, &frameDelay);
+    if (properties) {
+        CFRelease(properties);
+    }
+    return frameDelay;
 }
 @end
