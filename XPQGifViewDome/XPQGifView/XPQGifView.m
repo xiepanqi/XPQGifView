@@ -14,6 +14,7 @@
 @property (nonatomic, assign) size_t frameIndex;
 /// 标识图片资源是否改变。
 @property (nonatomic, assign) BOOL isSourceChange;
+@property (nonatomic, assign) NSUInteger lastCount;
 @end
 
 @implementation XPQGifView
@@ -70,15 +71,21 @@
 }
 
 #pragma mark - 操作
--(void)start {
+- (void)start {
+    _lastCount = self.loopCount;
     [self playGifAnimation];
 }
 
--(void)suspend {
+- (void)startLoopCount:(NSUInteger)loopCount {
+    self.loopCount = loopCount;
+    [self start];
+}
+
+- (void)suspend {
     _isPlay = NO;
 }
 
--(void)stop {
+- (void)stop {
     _isPlay = NO;
     _frameIndex = 0;
     self.image = [UIImage imageWithData:_gifData];
@@ -96,7 +103,7 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         CGImageSourceRef src = nil;
         size_t frameCount = 0;
-        while (weakSelf.isPlay) {
+        while (weakSelf.isPlay && weakSelf.lastCount > 0) {
             NSDate *beginTime = [NSDate date];
             // gifData改变或者线程刚开始src为nil，并且要gifData有数据
             if ((weakSelf.isSourceChange || src == nil) && weakSelf.gifData != nil) {
@@ -109,7 +116,7 @@
                     frameCount = CGImageSourceGetCount(src);
                 }
                 else {
-                    return;
+                    break;
                 }
             }
             
@@ -118,8 +125,8 @@
             weakSelf.frameIndex ++;
             if (weakSelf.frameIndex == frameCount) {
                 weakSelf.frameIndex = 0;
-                if (weakSelf.loopCount != NSUIntegerMax) {
-                    weakSelf.loopCount --;
+                if (weakSelf.lastCount != NSUIntegerMax) {
+                    weakSelf.lastCount --;
                 }
             }
             CGImageRef cgImg = CGImageSourceCreateImageAtIndex(src, weakSelf.frameIndex, NULL);

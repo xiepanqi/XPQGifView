@@ -15,20 +15,23 @@
  另外还实现了gif动画的暂停、快进、慢放功能。
  */
 @interface XPQGifView : UIImageView
+
+- (instancetype)initWithGifData:(NSData *)gifData;
 /// 无效初始化
 - (instancetype)initWithImage:(UIImage *)image UNAVAILABLE_ATTRIBUTE;
 - (instancetype)initWithImage:(UIImage *)image highlightedImage:(UIImage *)highlightedImage UNAVAILABLE_ATTRIBUTE;
-- (instancetype)initWithGifData:(NSData *)gifData;
+
 /// 是否在播放
 @property (nonatomic, assign, readonly) BOOL isPlay;
 /// 播放次数，设置为 NSUIntegerMax 表示无限播发。默认为NSUIntegerMax。
 @property (nonatomic, assign) NSUInteger loopCount;
-/// gif数据源。
-@property (nonatomic, strong) NSData *gifData;
 /// 播发速度倍数，越大播发速度越慢，越小越快。实际播发速度＝原播发速度*sleep。默认1.0。
 @property (nonatomic, assign) CGFloat sleep;
+/// gif数据源。
+@property (nonatomic, strong) NSData *gifData;
 
 - (void)start;
+- (void)startLoopCount:(NSUInteger)loopCount;
 - (void)suspend;
 - (void)stop;
 @end
