@@ -7,8 +7,10 @@
 //
 
 #import "ViewController.h"
+#import "XPQGifView.h"
 
 @interface ViewController ()
+@property (weak, nonatomic) IBOutlet XPQGifView *gifView;
 
 @end
 
@@ -24,4 +26,13 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (IBAction)clickStart:(id)sender {
+//    self.gifView.loopCount = 2;
+    NSData *gifData = [NSData dataWithContentsOfFile: [[NSBundle mainBundle] pathForResource:@"test2" ofType:@"gif"]];
+    [self.gifView loadGifData:gifData];
+}
+- (IBAction)clickStop:(id)sender {
+//    [self.gifView stop];
+    [self.gifView removeFromSuperview];
+}
 @end

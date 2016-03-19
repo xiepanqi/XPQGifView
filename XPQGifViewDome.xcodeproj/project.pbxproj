@@ -13,6 +13,9 @@
 		DF643F511C9CFB9200822D12 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DF643F4F1C9CFB9200822D12 /* Main.storyboard */; };
 		DF643F531C9CFB9200822D12 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DF643F521C9CFB9200822D12 /* Assets.xcassets */; };
 		DF643F561C9CFB9200822D12 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DF643F541C9CFB9200822D12 /* LaunchScreen.storyboard */; };
+		DF643F601C9CFBD300822D12 /* XPQGifView.m in Sources */ = {isa = PBXBuildFile; fileRef = DF643F5F1C9CFBD300822D12 /* XPQGifView.m */; };
+		DF643F641C9D062300822D12 /* test.gif in Resources */ = {isa = PBXBuildFile; fileRef = DF643F631C9D062300822D12 /* test.gif */; };
+		DF89238E1C9D0B5500E5E7A1 /* test2.gif in Resources */ = {isa = PBXBuildFile; fileRef = DF89238D1C9D0B5500E5E7A1 /* test2.gif */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +29,10 @@
 		DF643F521C9CFB9200822D12 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DF643F551C9CFB9200822D12 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		DF643F571C9CFB9200822D12 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DF643F5E1C9CFBD300822D12 /* XPQGifView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XPQGifView.h; sourceTree = "<group>"; };
+		DF643F5F1C9CFBD300822D12 /* XPQGifView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XPQGifView.m; sourceTree = "<group>"; };
+		DF643F631C9D062300822D12 /* test.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = test.gif; sourceTree = "<group>"; };
+		DF89238D1C9D0B5500E5E7A1 /* test2.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = test2.gif; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,10 +65,13 @@
 		DF643F451C9CFB9200822D12 /* XPQGifViewDome */ = {
 			isa = PBXGroup;
 			children = (
+				DF643F5D1C9CFBB600822D12 /* XPQGifView */,
 				DF643F491C9CFB9200822D12 /* AppDelegate.h */,
 				DF643F4A1C9CFB9200822D12 /* AppDelegate.m */,
 				DF643F4C1C9CFB9200822D12 /* ViewController.h */,
 				DF643F4D1C9CFB9200822D12 /* ViewController.m */,
+				DF643F631C9D062300822D12 /* test.gif */,
+				DF89238D1C9D0B5500E5E7A1 /* test2.gif */,
 				DF643F4F1C9CFB9200822D12 /* Main.storyboard */,
 				DF643F521C9CFB9200822D12 /* Assets.xcassets */,
 				DF643F541C9CFB9200822D12 /* LaunchScreen.storyboard */,
@@ -77,6 +87,15 @@
 				DF643F471C9CFB9200822D12 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DF643F5D1C9CFBB600822D12 /* XPQGifView */ = {
+			isa = PBXGroup;
+			children = (
+				DF643F5E1C9CFBD300822D12 /* XPQGifView.h */,
+				DF643F5F1C9CFBD300822D12 /* XPQGifView.m */,
+			);
+			path = XPQGifView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -110,6 +129,7 @@
 				TargetAttributes = {
 					DF643F421C9CFB9100822D12 = {
 						CreatedOnToolsVersion = 7.2.1;
+						DevelopmentTeam = PDV5VJ82L4;
 					};
 				};
 			};
@@ -136,6 +156,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF89238E1C9D0B5500E5E7A1 /* test2.gif in Resources */,
+				DF643F641C9D062300822D12 /* test.gif in Resources */,
 				DF643F561C9CFB9200822D12 /* LaunchScreen.storyboard in Resources */,
 				DF643F531C9CFB9200822D12 /* Assets.xcassets in Resources */,
 				DF643F511C9CFB9200822D12 /* Main.storyboard in Resources */,
@@ -150,6 +172,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DF643F4E1C9CFB9200822D12 /* ViewController.m in Sources */,
+				DF643F601C9CFBD300822D12 /* XPQGifView.m in Sources */,
 				DF643F4B1C9CFB9200822D12 /* AppDelegate.m in Sources */,
 				DF643F481C9CFB9200822D12 /* main.m in Sources */,
 			);
@@ -263,6 +286,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = XPQGifViewDome/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.xpq.XPQGifViewDome;
@@ -274,6 +298,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = XPQGifViewDome/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.xpq.XPQGifViewDome;
@@ -300,6 +325,7 @@
 				DF643F5C1C9CFB9200822D12 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
