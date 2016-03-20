@@ -38,4 +38,10 @@
 - (void)startLoopCount:(NSUInteger)loopCount;
 - (void)suspend;
 - (void)stop;
+
+
++ (NSTimeInterval)delayTimeWithGifData:(NSData *)gifData andIndex:(size_t)index;
++ (NSArray<NSNumber*> *)delayArrayWithGifData:(NSData *)gifData;
++ (UIImage *)imageWithGifData:(NSData *)gifData andIndex:(size_t)index;
++ (NSArray<UIImage*> *)imageArrayWithGifData:(NSData *)gifData;
 @end

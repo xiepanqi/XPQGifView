@@ -16,11 +16,6 @@
 @property (nonatomic, assign) BOOL isSourceChange;
 /// 还剩余的播发次数。
 @property (nonatomic, assign) NSUInteger lastCount;
-
-/// 保存帧播发间隔时间。因为播发间隔数据量不大就全部保存下来，减少CPU开销。
-@property (nonatomic, strong) NSMutableArray<NSNumber*> *frameDelayArray;
-/// 保存帧图片。因为图片数据量太大，内存消耗巨大，所以只保存部分，平衡内存和CPU的开销。
-@property (nonatomic, strong) NSMutableDictionary<NSNumber*, UIImage*> *imageCache;
 @end
 
 @implementation XPQGifView
@@ -121,6 +116,8 @@
         CGImageSourceRef src = nil;
         size_t frameCount = 0;
         size_t frameCacheInterval = NSUIntegerMax;
+        NSArray<NSNumber*> *frameDelayArray = nil;
+        NSMutableDictionary<NSNumber*, UIImage*> *imageCache = nil;
         while (weakSelf.isPlay && weakSelf.lastCount > 0) {
             NSDate *beginTime = [NSDate date];
             // gifData改变或者线程刚开始src为nil，并且要gifData有数据
@@ -132,8 +129,8 @@
                 src = CGImageSourceCreateWithData((__bridge CFDataRef)weakSelf.gifData, NULL);
                 if (src) {
                     frameCount = CGImageSourceGetCount(src);
-                    weakSelf.frameDelayArray = [NSMutableArray array];
-                    weakSelf.imageCache = [NSMutableDictionary dictionary];
+                    frameDelayArray = [XPQGifView delayArrayWithSource:src];
+                    imageCache = [NSMutableDictionary dictionary];
                     if (weakSelf.frameCacheInterval != NSUIntegerMax) {
                         frameCacheInterval = weakSelf.frameCacheInterval + 1;
                     }
@@ -144,14 +141,9 @@
             }
             
             NSTimeInterval frameDelay = 0.0;
-            if (weakSelf.frameIndex < weakSelf.frameDelayArray.count) {
-                frameDelay = weakSelf.frameDelayArray[weakSelf.frameIndex].floatValue;
+            if (weakSelf.frameIndex < frameDelayArray.count) {
+                frameDelay = frameDelayArray[weakSelf.frameIndex].floatValue * weakSelf.sleep;
             }
-            else {
-                frameDelay = [weakSelf delayTimeWithSource:src andIndex:weakSelf.frameIndex];
-                [weakSelf.frameDelayArray addObject:@(frameDelay)];
-            }
-            frameDelay *= weakSelf.sleep;
             weakSelf.frameIndex ++;
             if (weakSelf.frameIndex == frameCount) {
                 weakSelf.frameIndex = 0;
@@ -159,16 +151,12 @@
                     weakSelf.lastCount --;
                 }
             }
-            UIImage *image =  weakSelf.imageCache[@(weakSelf.frameIndex)];
+            UIImage *image = imageCache[@(weakSelf.frameIndex)];
             if (image == nil) {
-                CGImageRef cgImg = CGImageSourceCreateImageAtIndex(src, weakSelf.frameIndex, NULL);
-                image = [UIImage imageWithCGImage:cgImg];
-                CGImageRelease(cgImg);
-                // 使用下面一句替换上面三句的话，在Release模式下内存暴涨
-//                image = [weakSelf imageWithSource:src andIndex:weakSelf.frameIndex];
+                image = [XPQGifView imageWithSource:src andIndex:weakSelf.frameIndex];
                 if (frameCacheInterval < frameCount
                     && weakSelf.frameIndex % frameCacheInterval == 0) {
-                    weakSelf.imageCache[@(weakSelf.frameIndex)] = image;
+                    imageCache[@(weakSelf.frameIndex)] = image;
                 }
             }
             [NSThread sleepUntilDate:[beginTime dateByAddingTimeInterval:frameDelay]];
@@ -185,8 +173,8 @@
     });
 }
 
-/// 获取gif指定帧图像，在Release模式下内存暴涨，但使用Leaks检测内存并没有泄漏
--(UIImage *)imageWithSource:(CGImageSourceRef)src andIndex:(size_t)index {
+/// 获取gif指定帧图像
++ (UIImage *)imageWithSource:(CGImageSourceRef)src andIndex:(size_t)index {
     CGImageRef cgImg = CGImageSourceCreateImageAtIndex(src, index, NULL);
     UIImage *image = [UIImage imageWithCGImage:cgImg];
     CGImageRelease(cgImg);
@@ -194,7 +182,7 @@
 }
 
 /// 获取gif指定帧持续时间，好像有内存泄漏，不过用Leaks检测不出
--(NSTimeInterval)delayTimeWithSource:(CGImageSourceRef)src andIndex:(size_t)index {
++ (NSTimeInterval)delayTimeWithSource:(CGImageSourceRef)src andIndex:(size_t)index {
     CGFloat frameDelay = 0.0;
     CFDictionaryRef properties = CGImageSourceCopyPropertiesAtIndex(src, index, NULL);
     CFDictionaryRef frameProperties = CFDictionaryGetValue(properties, kCGImagePropertyGIFDictionary);
@@ -204,5 +192,69 @@
         CFRelease(properties);
     }
     return frameDelay;
+}
+
++ (NSArray<NSNumber*> *)delayArrayWithSource:(CGImageSourceRef)src {
+    NSMutableArray *array = [NSMutableArray array];
+    size_t frameCount = CGImageSourceGetCount(src);
+    for (size_t i = 0; i < frameCount; i++) {
+        NSTimeInterval delay = [XPQGifView delayTimeWithSource:src andIndex:i];
+        [array addObject:@(delay)];
+    }
+    return array;
+}
+
+#pragma mark - 公开的类方法
++ (NSTimeInterval)delayTimeWithGifData:(NSData *)gifData andIndex:(size_t)index {
+    CGImageSourceRef src = CGImageSourceCreateWithData((__bridge CFDataRef)gifData, NULL);
+    if (src) {
+        NSTimeInterval delay = [XPQGifView delayTimeWithSource:src andIndex:index];
+        CFRelease(src);
+        return delay;
+    }
+    else {
+        return 0.0;
+    }
+}
+
++ (NSArray<NSNumber*> *)delayArrayWithGifData:(NSData *)gifData {
+    CGImageSourceRef src = CGImageSourceCreateWithData((__bridge CFDataRef)gifData, NULL);
+    if (src) {
+        NSArray *array = [XPQGifView delayArrayWithSource:src];
+        CFRelease(src);
+        return array;
+    }
+    else {
+        return nil;
+    }
+}
+
++ (UIImage *)imageWithGifData:(NSData *)gifData andIndex:(size_t)index {
+    CGImageSourceRef src = CGImageSourceCreateWithData((__bridge CFDataRef)gifData, NULL);
+    if (src) {
+        UIImage *image = [XPQGifView imageWithSource:src andIndex:index];
+        CFRelease(src);
+        return image;
+    }
+    else {
+        return nil;
+    }
+}
+
++ (NSArray<UIImage*> *)imageArrayWithGifData:(NSData *)gifData {
+    CGImageSourceRef src = CGImageSourceCreateWithData((__bridge CFDataRef)gifData, NULL);
+    if (src) {
+        NSMutableArray *array = [NSMutableArray array];
+        size_t frameCount = CGImageSourceGetCount(src);
+        for (size_t i = 0; i < frameCount; i++) {
+            UIImage *image = [XPQGifView imageWithSource:src andIndex:i];
+            [array addObject:image];
+        }
+        CFRelease(src);
+        return array;
+    }
+    else {
+        return nil;
+    }
 }
 @end
