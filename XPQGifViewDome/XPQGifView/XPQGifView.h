@@ -17,6 +17,7 @@
 @interface XPQGifView : UIImageView
 
 - (instancetype)initWithGifData:(NSData *)gifData;
+- (instancetype)initWithGifData:(NSData *)gifData andLoopCount:(NSUInteger)loopCount;
 /// 无效初始化
 - (instancetype)initWithImage:(UIImage *)image UNAVAILABLE_ATTRIBUTE;
 - (instancetype)initWithImage:(UIImage *)image highlightedImage:(UIImage *)highlightedImage UNAVAILABLE_ATTRIBUTE;
@@ -27,6 +28,9 @@
 @property (nonatomic, assign) NSUInteger loopCount;
 /// 播发速度倍数，越大播发速度越慢，越小越快。实际播发速度＝原播发速度*sleep。默认1.0。
 @property (nonatomic, assign) CGFloat sleep;
+/// 内存占比。默认NSUIntegerMax。该值表示隔多少帧保存一次缓存，为0表示全部保存，大于frameCount全部不保存。
+/// 值越小占用内存越大，消耗CPU越小。修改此值必须要动画下次启动才生效。此值根据实际使用情况来设置。
+@property (nonatomic, assign) NSUInteger frameCacheInterval;
 /// gif数据源。
 @property (nonatomic, strong) NSData *gifData;
 

@@ -14,7 +14,13 @@
 @property (nonatomic, assign) size_t frameIndex;
 /// 标识图片资源是否改变。
 @property (nonatomic, assign) BOOL isSourceChange;
+/// 还剩余的播发次数。
 @property (nonatomic, assign) NSUInteger lastCount;
+
+/// 保存帧播发间隔时间。因为播发间隔数据量不大就全部保存下来，减少CPU开销。
+@property (nonatomic, strong) NSMutableArray<NSNumber*> *frameDelayArray;
+/// 保存帧图片。因为图片数据量太大，内存消耗巨大，所以只保存部分，平衡内存和CPU的开销。
+@property (nonatomic, strong) NSMutableDictionary<NSNumber*, UIImage*> *imageCache;
 @end
 
 @implementation XPQGifView
@@ -52,11 +58,22 @@
     return self;
 }
 
+- (instancetype)initWithGifData:(NSData *)gifData andLoopCount:(NSUInteger)loopCount {
+    self = [super init];
+    if (self) {
+        [self configSelf];
+        self.gifData = gifData;
+        self.loopCount = loopCount;
+    }
+    return self;
+}
+
 - (void)configSelf {
     _isPlay = NO;
     _loopCount = NSUIntegerMax;
     _frameIndex = 0;
     _sleep = 1.0;
+    _frameCacheInterval = NSUIntegerMax;
 }
 
 #pragma mark - 属性
@@ -103,6 +120,7 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         CGImageSourceRef src = nil;
         size_t frameCount = 0;
+        size_t frameCacheInterval = NSUIntegerMax;
         while (weakSelf.isPlay && weakSelf.lastCount > 0) {
             NSDate *beginTime = [NSDate date];
             // gifData改变或者线程刚开始src为nil，并且要gifData有数据
@@ -114,13 +132,25 @@
                 src = CGImageSourceCreateWithData((__bridge CFDataRef)weakSelf.gifData, NULL);
                 if (src) {
                     frameCount = CGImageSourceGetCount(src);
+                    weakSelf.frameDelayArray = [NSMutableArray array];
+                    weakSelf.imageCache = [NSMutableDictionary dictionary];
+                    if (weakSelf.frameCacheInterval != NSUIntegerMax) {
+                        frameCacheInterval = weakSelf.frameCacheInterval + 1;
+                    }
                 }
                 else {
                     break;
                 }
             }
             
-            NSTimeInterval frameDelay = [weakSelf delayTimeWithSource:src andIndex:weakSelf.frameIndex];
+            NSTimeInterval frameDelay = 0.0;
+            if (weakSelf.frameIndex < weakSelf.frameDelayArray.count) {
+                frameDelay = weakSelf.frameDelayArray[weakSelf.frameIndex].floatValue;
+            }
+            else {
+                frameDelay = [weakSelf delayTimeWithSource:src andIndex:weakSelf.frameIndex];
+                [weakSelf.frameDelayArray addObject:@(frameDelay)];
+            }
             frameDelay *= weakSelf.sleep;
             weakSelf.frameIndex ++;
             if (weakSelf.frameIndex == frameCount) {
@@ -129,11 +159,18 @@
                     weakSelf.lastCount --;
                 }
             }
-            CGImageRef cgImg = CGImageSourceCreateImageAtIndex(src, weakSelf.frameIndex, NULL);
-            UIImage *image = [UIImage imageWithCGImage:cgImg];
-            CGImageRelease(cgImg);
-            // 使用下面一句替换上面三句的话，在Release模式下内存暴涨
-//            UIImage *image = [weakSelf imageWithSource:src andIndex:weakSelf.frameIndex];
+            UIImage *image =  weakSelf.imageCache[@(weakSelf.frameIndex)];
+            if (image == nil) {
+                CGImageRef cgImg = CGImageSourceCreateImageAtIndex(src, weakSelf.frameIndex, NULL);
+                image = [UIImage imageWithCGImage:cgImg];
+                CGImageRelease(cgImg);
+                // 使用下面一句替换上面三句的话，在Release模式下内存暴涨
+//                image = [weakSelf imageWithSource:src andIndex:weakSelf.frameIndex];
+                if (frameCacheInterval < frameCount
+                    && weakSelf.frameIndex % frameCacheInterval == 0) {
+                    weakSelf.imageCache[@(weakSelf.frameIndex)] = image;
+                }
+            }
             [NSThread sleepUntilDate:[beginTime dateByAddingTimeInterval:frameDelay]];
             dispatch_sync(dispatch_get_main_queue(), ^{  // 使用异步的话有小概率出现问题
                 if (weakSelf.isPlay && !weakSelf.isSourceChange) {
