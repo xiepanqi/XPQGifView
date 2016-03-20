@@ -27,12 +27,35 @@
 }
 
 - (IBAction)clickStart:(id)sender {
-//    self.gifView.loopCount = 2;
-    NSData *gifData = [NSData dataWithContentsOfFile: [[NSBundle mainBundle] pathForResource:@"test2" ofType:@"gif"]];
-    [self.gifView loadGifData:gifData];
+    if (self.gifView.gifData == nil) {
+        self.gifView.gifData = [NSData dataWithContentsOfFile: [[NSBundle mainBundle] pathForResource:@"test2" ofType:@"gif"]];
+    }
+    [self.gifView start];
 }
+
+- (IBAction)clickSuspend:(id)sender {
+    [self.gifView suspend];
+}
+
 - (IBAction)clickStop:(id)sender {
-//    [self.gifView stop];
-    [self.gifView removeFromSuperview];
+    [self.gifView stop];
+}
+
+- (IBAction)clickFast:(id)sender {
+//    [self.gifView suspend];
+    self.gifView.sleep = 0.5;
+//    [self.gifView start];
+}
+
+- (IBAction)clickNormal:(id)sender {
+//    [self.gifView suspend];
+    self.gifView.sleep = 1.0;
+//    [self.gifView start];
+}
+
+- (IBAction)clickSlow:(id)sender {
+//    [self.gifView suspend];
+    self.gifView.sleep = 2.0;
+//    [self.gifView start];
 }
 @end

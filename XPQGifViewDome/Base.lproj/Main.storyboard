@@ -21,17 +21,45 @@
                                 <rect key="frame" x="20" y="28" width="215" height="197"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p0f-VD-Y8E">
-                                <rect key="frame" x="48" y="267" width="46" height="30"/>
+                                <rect key="frame" x="38" y="255" width="46" height="30"/>
                                 <state key="normal" title="开始"/>
                                 <connections>
                                     <action selector="clickStart:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Qkc-I1-AJd"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mcz-Eb-2ae">
-                                <rect key="frame" x="150" y="267" width="46" height="30"/>
+                                <rect key="frame" x="161" y="255" width="46" height="30"/>
                                 <state key="normal" title="停止"/>
                                 <connections>
                                     <action selector="clickStop:" destination="BYZ-38-t0r" eventType="touchUpInside" id="cgr-b5-ZpH"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JgT-Rg-NYR">
+                                <rect key="frame" x="104" y="255" width="46" height="30"/>
+                                <state key="normal" title="暂停"/>
+                                <connections>
+                                    <action selector="clickSuspend:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KhT-a6-aSH"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eAN-Ok-HLs">
+                                <rect key="frame" x="38" y="309" width="46" height="30"/>
+                                <state key="normal" title="快进"/>
+                                <connections>
+                                    <action selector="clickFast:" destination="BYZ-38-t0r" eventType="touchUpInside" id="O8e-2w-YFY"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="W2Q-bX-QTV">
+                                <rect key="frame" x="161" y="309" width="46" height="30"/>
+                                <state key="normal" title="慢放"/>
+                                <connections>
+                                    <action selector="clickSlow:" destination="BYZ-38-t0r" eventType="touchUpInside" id="37K-9B-FdI"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mNd-jY-A7r">
+                                <rect key="frame" x="104" y="309" width="46" height="30"/>
+                                <state key="normal" title="正常"/>
+                                <connections>
+                                    <action selector="clickNormal:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zeu-WT-Fby"/>
                                 </connections>
                             </button>
                         </subviews>
