@@ -16,6 +16,7 @@
  */
 @interface XPQGifView : UIImageView
 
+/// 初始化XPQGifView
 - (instancetype)initWithGifData:(NSData *)gifData;
 - (instancetype)initWithGifData:(NSData *)gifData andLoopCount:(NSUInteger)loopCount;
 /// 无效初始化
@@ -34,14 +35,48 @@
 /// gif数据源。
 @property (nonatomic, strong) NSData *gifData;
 
+/**
+ *  @brief 启动无限播发GIF，如果gifData为nil则不做任何操作。
+ */
 - (void)start;
+/**
+ *  @brief 指定次数播发GIF，如果gifData为nil则不做任何操作。
+ *  @param loopCount 重复播发次数
+ */
 - (void)startLoopCount:(NSUInteger)loopCount;
+/**
+ *  @brief 暂停播发GIF，再次使用start时从暂停的帧开始播发。
+ */
 - (void)suspend;
+/**
+ *  @brief 停止播发GIF，再次使用start时从第一帧开始播发。
+ */
 - (void)stop;
 
-
+/**
+ *  @brief 获取GIF的指定帧的显示时长。
+ *  @param gifData GIF图片数据源
+ *  @param index   帧索引
+ *  @return 帧显示时长
+ */
 + (NSTimeInterval)delayTimeWithGifData:(NSData *)gifData andIndex:(size_t)index;
+/**
+ *  @brief 获取GIF的帧显示时长数组。
+ *  @param gifData GIF图片数据源
+ *  @return 帧显示时长数组
+ */
 + (NSArray<NSNumber*> *)delayArrayWithGifData:(NSData *)gifData;
+/**
+ *  @brief 获取GIF的指定帧图像。
+ *  @param gifData GIF图片数据源
+ *  @param index   帧索引
+ *  @return 帧图像
+ */
 + (UIImage *)imageWithGifData:(NSData *)gifData andIndex:(size_t)index;
+/**
+ *  @brief 获取GIF的帧图片数组。
+ *  @param gifData GIF图片数据源
+ *  @return 帧图像数组
+ */
 + (NSArray<UIImage*> *)imageArrayWithGifData:(NSData *)gifData;
 @end
