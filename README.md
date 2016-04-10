@@ -51,7 +51,11 @@ CPU占用率调节则是把一定的帧图像保存到内存中，这样CPU的�
 
 ### 类方法
 有4个类方法，分别是获取帧的图像和显示时长。
+
 `+ (NSTimeInterval)delayTimeWithGifData:(NSData *)gifData andIndex:(size_t)index;`
+
 `+ (NSArray<NSNumber*> *)delayArrayWithGifData:(NSData *)gifData;`
+
 `+ (UIImage *)imageWithGifData:(NSData *)gifData andIndex:(size_t)index;`
+
 `+ (NSArray<UIImage*> *)imageArrayWithGifData:(NSData *)gifData;`
