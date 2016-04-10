@@ -3,7 +3,7 @@
 现在显示gif动态图大部分都是把所有帧加载到`UIImageView`的`animationImages`里面或者使用`UIWebView`显示。这两种方法使用`UIImageView`的`animationImages`会占用大量内存，而使用`UIWebView`不但内存占用更多，还要占用CPU资源，相比使用`UIImage`得不偿失。为了解决gif显示资源的占用问题特地写了这个gif显示view。
   
 ## 性能对比
-在Dome里面的GIF图分辨率是400*225/81帧。**（5S真机测试，模拟器性能会有不同）**
+在Dome里面的GIF图分辨率是400\*225/81帧。**（5S真机测试，模拟器性能会有不同）**
 
 使用`UIImageView`把所有帧都加载到`animationImages`内存会暴涨到35+M以上。
 
